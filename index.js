@@ -62,9 +62,9 @@ function draw() {
     randomiseBallColour()
   } else if(ballY + ballVelocityY > canvas.height - ballRadius) {
     if(ballX > paddleX && ballX < paddleX + paddleWidth) {
-      ballVelocityY = -ballVelocityY
+      ballVelocityY = -ballVelocityY -1
     } else {
-      alert("AHA, YOU'RE DEAD!")
+      // alert("AHA, YOU'RE DEAD!")
       document.location.reload()
       clearInterval(interval)
     }
