@@ -17,6 +17,22 @@ const paddleHeight = 10
 const paddleWidth = 75
 let paddleX = (canvas.width - paddleWidth) / 2
 
+const brickRowCount = 3
+const brickColumnCount = 5
+const brickWidth = 75
+const brickHeight = 20
+const brickPadding = 10
+const brickOffsetTop = 30
+const brickOffsetLeft = 30
+
+const bricks = []
+for (let c = 0; c < brickColumnCount; c++) {
+  bricks[c] = []
+  for (let r = 0; r < brickRowCount; r++) {
+    bricks[c][r] = { x: 0, y: 0, status: 1 }
+  }
+}
+
 function getRandomInt(min, max) {
   min = Math.ceil(min)
   max = Math.floor(max)
@@ -43,11 +59,31 @@ function drawPaddle() {
   ctx.closePath()
 }
 
+function drawBricks() {
+  for (let c = 0; c < brickColumnCount; c++) {
+    for (let r = 0; r < brickRowCount; r++) {
+      const brickX = (c * (brickWidth + brickPadding)) + brickOffsetLeft
+      const brickY = (r * (brickHeight + brickPadding)) + brickOffsetTop
+      bricks[c][r].x = brickX
+      bricks[c][r].y = brickY
+      if (bricks[c][r].status === 1) {
+        ctx.beginPath()
+        ctx.rect(brickX, brickY, brickWidth, brickHeight)
+        ctx.fillStyle = 'red'
+        ctx.fill()
+        ctx.closePath()
+      }
+    }
+  }
+}
+
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
 
+  drawBricks()
   drawBall()
   drawPaddle()
+  collisionDetection()
 
   ballX += ballVelocityX
   ballY += ballVelocityY
@@ -101,9 +137,24 @@ function keyUpHandler(event) {
   }
 }
 
+function collisionDetection() {
+  for (let c = 0; c < brickColumnCount; c++) {
+    for (let r = 0; r < brickRowCount; r++) {
+      const b = bricks[c][r]
+      if (b.status === 1) {
+        if(ballX > b.x && ballX < b.x+brickWidth && ballY > b.y && ballY < b.y+brickHeight) {
+          ballVelocityY = -ballVelocityY;
+          b.status = 0
+        }
+      }
+    }
+  }
+}
+
+
 document.addEventListener("keydown", keyDownHandler, false)
 
 document.addEventListener("keyup", keyUpHandler, false)
 
-let interval = setInterval(draw, 10)
+let interval = setInterval(draw, 20)
 
