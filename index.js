@@ -1,6 +1,9 @@
 const canvas = document.getElementById('myCanvas')
 const ctx = canvas.getContext("2d")
 
+let score = 0
+let lives = 3
+
 let ballX = canvas.width / 2
 let ballY = canvas.height - 30
 
@@ -83,6 +86,8 @@ function draw() {
   drawBricks()
   drawBall()
   drawPaddle()
+  drawScore()
+  drawLives()
   collisionDetection()
 
   ballX += ballVelocityX
@@ -100,9 +105,19 @@ function draw() {
     if(ballX > paddleX && ballX < paddleX + paddleWidth) {
       ballVelocityY = -ballVelocityY -1
     } else {
-      // alert("AHA, YOU'RE DEAD!")
-      document.location.reload()
-      clearInterval(interval)
+      console.log('>>> lives: ', lives)
+      lives--
+      if(!lives) {
+        alert("AHA, YOU'RE DEAD!")
+        document.location.reload()
+      } else {
+        ballX = canvas.width / 2
+        ballY = canvas.height - 30
+        ballVelocityX = 2
+        ballVelocityY = -2
+        paddleX = (canvas.width-paddleWidth) / 2
+      }
+
     }
   }
 
@@ -119,6 +134,8 @@ function draw() {
       paddleX = 0
     }
   }
+
+  requestAnimationFrame(draw)
 }
 
 function keyDownHandler(event) {
@@ -137,6 +154,14 @@ function keyUpHandler(event) {
   }
 }
 
+function mouseMoveHandler(e) {
+  const relativeX = e.clientX - canvas.offsetLeft
+  if(relativeX > 0 && relativeX < canvas.width) {
+    paddleX = relativeX - paddleWidth/2
+  }
+}
+
+
 function collisionDetection() {
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
@@ -145,16 +170,34 @@ function collisionDetection() {
         if(ballX > b.x && ballX < b.x+brickWidth && ballY > b.y && ballY < b.y+brickHeight) {
           ballVelocityY = -ballVelocityY;
           b.status = 0
+          score++
+          if (score == brickRowCount * brickColumnCount) {
+            alert("You've won. No more bricks left to break. Well done.")
+            document.location.reload()
+          }
         }
       }
     }
   }
 }
 
+function drawScore() {
+  ctx.font = '16px Arial'
+  ctx.fillStyle = '#0095DD'
+  ctx.fillText('Score: ' + score, 8, 20)
+}
+
+function drawLives() {
+  ctx.font = "16px Arial"
+  ctx.fillStyle = "#0095DD"
+  ctx.fillText("Lives: " + lives, canvas.width - 65, 20);
+}
 
 document.addEventListener("keydown", keyDownHandler, false)
 
 document.addEventListener("keyup", keyUpHandler, false)
 
-let interval = setInterval(draw, 20)
+document.addEventListener('mousemove', mouseMoveHandler, false)
+
+draw()
 
